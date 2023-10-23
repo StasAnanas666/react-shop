@@ -53,8 +53,8 @@ app.put("/products", async(req, res) => {
 })
 
 //удаление товара
-app.delete("/products", async(req, res) => {
-    await db.collection("produts").deleteOne({_id: new ObjectId(req.params.id)});
+app.delete("/products/:id", async(req, res) => {
+    await db.collection("products").deleteOne({_id: new ObjectId(req.params.id)});
     res.json({message: "Товар успешно удален"});
 })
 

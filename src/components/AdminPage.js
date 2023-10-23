@@ -6,14 +6,11 @@ import {
   updateProduct,
   deleteProduct,
 } from "../features/products/productsSlice";
+import EditPopup from "./EditPopup";
 
 function AdminPage() {
   const dispatch = useDispatch();
   const products = useSelector((state) => state.products.list);
-
-  useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -22,6 +19,7 @@ function AdminPage() {
     image: null,
     quantity: 0,
   });
+
   const [editingProductId, setEditingProductId] = useState(null);
 
   //сброс данных формы
@@ -36,10 +34,8 @@ function AdminPage() {
   };
 
   //добавление товаров
-  const handleAddProduct = (e) => {
-    e.preventDefault();
+  const handleAddProduct = () => {
     dispatch(addProduct(formData));
-    console.log(formData);
     resetFormData();
   };
 
@@ -48,17 +44,25 @@ function AdminPage() {
     dispatch(deleteProduct(productId));
   };
 
-  //изменение товара
+  //открытие попапа для изменения с передачей в него данных товара
   const handleEditProduct = (product) => {
     setEditingProductId(product._id);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      image: product.image,
-      quantity: product.quantity,
-    });
   };
+
+  //изменение товара
+  const handleSaveEdit = () => {
+    dispatch(updateProduct({_id: editingProductId, data: formData}));
+    resetFormData();
+  }
+
+  //сброс данных изменяемого товара, закрытие попапа
+  const handleCancelEdit = () => {
+    setEditingProductId(null);
+  }
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   return (
     <div className="container">
@@ -180,7 +184,8 @@ function AdminPage() {
         <tbody>
           {Array.isArray(products) && products.length > 0 ? (
             products.map((product) => (
-              <tr key={product._id}>
+              <React.Fragment key={product._id}>
+              <tr>
                 <td>
                   <img
                     src={require(`/public/images/${product.image}`)}
@@ -194,8 +199,11 @@ function AdminPage() {
                 <td>{product.quantity}</td>
                 <td>
                   <button
+                    type="button"
                     className="btn btn-outline-warning me-4"
                     onClick={() =>handleEditProduct(product)}
+                    data-bs-toggle="modal" 
+                    data-bs-target="#exampleModal"
                   >
                     Изменить
                   </button>
@@ -207,6 +215,18 @@ function AdminPage() {
                   </button>
                 </td>
               </tr>
+              {editingProductId === product._id && (
+                <tr>
+                  <td colSpan="6">
+                    <EditPopup
+                    product={product}
+                    onSave={handleSaveEdit}
+                    onClose={handleCancelEdit}
+                  />
+                  </td>
+                </tr>
+              )}
+              </React.Fragment>
             ))
           ) : (
             <tr>
