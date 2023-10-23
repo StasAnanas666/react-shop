@@ -9,7 +9,11 @@ import {
 
 function AdminPage() {
   const dispatch = useDispatch();
-  const products = useSelector((state) => state.list);
+  const products = useSelector((state) => state.products.list);
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -32,8 +36,10 @@ function AdminPage() {
   };
 
   //добавление товаров
-  const handleAddProduct = () => {
+  const handleAddProduct = (e) => {
+    e.preventDefault();
     dispatch(addProduct(formData));
+    console.log(formData);
     resetFormData();
   };
 
@@ -54,17 +60,13 @@ function AdminPage() {
     });
   };
 
-  useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
-
   return (
     <div className="container">
-      <div class="accordion my-4" id="accordionExample">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingOne">
+      <div className="accordion my-4" id="accordionExample">
+        <div className="accordion-item">
+          <h2 className="accordion-header" id="headingOne">
             <button
-              class="accordion-button"
+              className="accordion-button"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapseOne"
@@ -76,11 +78,11 @@ function AdminPage() {
           </h2>
           <div
             id="collapseOne"
-            class="accordion-collapse collapse"
+            className="accordion-collapse collapse"
             aria-labelledby="headingOne"
             data-bs-parent="#accordionExample"
           >
-            <div class="accordion-body">
+            <div className="accordion-body">
               <form onSubmit={handleAddProduct}>
                 <div className="form-group my-3">
                   <input
@@ -163,7 +165,7 @@ function AdminPage() {
         </div>
       </div>
 
-      <table className="table table-striped">
+      <table className="table table-striped align-middle text-center">
         <thead>
           <tr>
             <th>Изображение</th>
@@ -181,9 +183,9 @@ function AdminPage() {
               <tr key={product._id}>
                 <td>
                   <img
-                    src={`../public/images/${product.image}`}
+                    src={require(`/public/images/${product.image}`)}
                     alt={product.name}
-                    width="70"
+                    height="70"
                   />
                 </td>
                 <td>{product.name}</td>
@@ -192,14 +194,14 @@ function AdminPage() {
                 <td>{product.quantity}</td>
                 <td>
                   <button
-                    className="btn btn-outline-warning"
-                    onClick={handleEditProduct(product)}
+                    className="btn btn-outline-warning me-4"
+                    onClick={() =>handleEditProduct(product)}
                   >
                     Изменить
                   </button>
                   <button
                     className="btn btn-outline-danger"
-                    onClick={handleDeleteProduct(product._id)}
+                    onClick={() => handleDeleteProduct(product._id)}
                   >
                     Удалить
                   </button>
