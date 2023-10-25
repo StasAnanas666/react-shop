@@ -28,7 +28,7 @@ export async function updateProduct(productData) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(productData),
+    body: JSON.stringify(),
   });
   if (!response.ok) {
     throw new Error("Ошибка при обновлении товара!");

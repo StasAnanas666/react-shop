@@ -1,6 +1,8 @@
 const express = require("express");
 const {MongoClient, ObjectId} = require("mongodb");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const port = 8888;
@@ -25,6 +27,60 @@ app.use(cors());
 
 const db = client.db("react-market");
 
+/* -----------------------------регистрация/аутентификация------------------------------- */
+
+app.post("/login", async(req, res) => {
+    const {email, password} = req.body;
+    const user = await db.collection("users").findOne({email});
+
+    if(!user) {
+        res.status(401).json({error: "Пользователь не найден"});
+    }
+    else {
+        bcrypt.compare(password, user.password, (error, passwordMatch) => {
+            if(error) {
+                res.status(500).json({error: "Ошибка сравнения паролей"});
+            }
+            else if(passwordMatch) {
+                const token = jwt.sign({userId: user._id}, "react-shop", {expiresIn: "1h"});
+                res.json({token});
+            }
+            else {
+                res.status(401).json({error: "Неверный пароль"});
+            }
+        })
+    }
+});
+
+app.post("/register", async(req, res) => {
+    const {username, email, password} = req.body;
+
+    const saltRounds = 10;
+    bcrypt.hash(password, saltRounds, async(error, hash) => {
+        if(error) {
+            res.status(500).json({error: "Ошибка шифрованя пароля"});
+        }
+        else {
+            const user = {
+                username,
+                email,
+                password: hash
+            };
+
+            try {
+                await db.collection("users").insertOne(user);
+                res.json({message: "Новый пользователь успешно зарегистрирован"});
+            }
+            catch {
+                res.status(500).json({error: "Ошибка регистрации пользователя"});
+            }
+        }
+    })
+})
+
+
+/* ------------------------------------товары-------------------------------------------- */
+
 //получение всех товаров
 app.get("/products", async(req, res) => {
     const products = await db.collection("products").find().toArray();
@@ -44,7 +100,7 @@ app.post("/products", async(req, res) => {
 })
 
 //изменение товара
-app.put("/products", async(req, res) => {
+app.put("/products/:id", async(req, res) => {
     await db.collection("products").updateOne(
         {_id: new ObjectId(req.params.id)},
         {$set: req.body}

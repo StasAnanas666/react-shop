@@ -15,6 +15,7 @@ function EditPopup({ product, onClose, onSave }) {
 
   const handleSave = () => {
     dispatch(updateProduct({ _id: product._id, data: formData }));
+    onSave();
   };
 
   return (

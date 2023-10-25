@@ -32,11 +32,12 @@ const productsSlice = createSlice({
                 state.list.push(action.payload);
             })
             .addCase(updateProduct.fulfilled, (state, action) => {
-                const updatedProduct = action.payload;
-                const existingProduct = state.list.find((product) => product._id === updatedProduct._id);
+                const {id, data} = action.payload;
+                const existingProductIndex = state.list.findIndex((product) => product._id === id);
                 //создание копии объекта
-                if(existingProduct) {
-                    Object.assign(existingProduct, updatedProduct);
+                if(existingProductIndex !== -1) {
+                    state.list[existingProductIndex] = {...state.list[existingProductIndex], ...data};
+                    // Object.assign(existingProduct, updatedProduct);
                 }
             })
             .addCase(deleteProduct.fulfilled, (state, action) => {

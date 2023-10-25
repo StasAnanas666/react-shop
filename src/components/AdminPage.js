@@ -51,7 +51,8 @@ function AdminPage() {
 
   //изменение товара
   const handleSaveEdit = () => {
-    dispatch(updateProduct({_id: editingProductId, data: formData}));
+    dispatch(updateProduct({editingProductId, formData}));
+    console.log(editingProductId);
     resetFormData();
   }
 
